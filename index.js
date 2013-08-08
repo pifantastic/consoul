@@ -6,13 +6,32 @@ var marked = require('marked');
 var colors = require('colors');
 var highlight = require('highlight.js');
 
-function Parser(options) {
-  this.tokens = [];
-  this.token = null;
-  this.options = options || marked.defaults;
+function escape (value) {
+  return value;
+}
+
+function Parser (options) {
+  marked.Parser.call(this, options);
+}
+
+function InlineLexer (links, options) {
+  marked.InlineLexer.call(this, links, options);
 }
 
 util.inherits(Parser, marked.Parser);
+util.inherits(InlineLexer, marked.InlineLexer);
+
+Parser.prototype.parse = function (src) {
+  this.inline = new InlineLexer(src.links, this.options);
+  this.tokens = src.reverse();
+
+  var out = '';
+  while (this.next()) {
+    out += this.tok();
+  }
+
+  return out;
+};
 
 Parser.prototype.tok = function () {
   switch (this.token.type) {
@@ -45,6 +64,10 @@ Parser.prototype.tok = function () {
             return text.cyan;
           case 'string':
             return text.red;
+          case 'params':
+            return text[0] + text.substring(1, text.length - 1).green + text[text.length - 1];
+          case 'literal':
+            return text.yellow;
           default:
             return text;
         }
@@ -149,18 +172,152 @@ Parser.prototype.tok = function () {
   }
 };
 
-var parser = new Parser();
+InlineLexer.prototype.output = function(src) {
+  var out = ''
+    , link
+    , text
+    , href
+    , cap;
 
-fs.readFile('./README.md', function (err, buffer) {
-	var src = marked.lexer(buffer.toString());
-  var output = parser.parse(src);
+  while (src) {
+    // escape
+    if (cap = this.rules.escape.exec(src)) {
+      src = src.substring(cap[0].length);
+      out += cap[1];
+      continue;
+    }
 
-  console.log('>>>>>>>>>>>>>>>>> SOURCE >>>>>>>>>>>>>>>>\n');
-	console.log(src);
+    // autolink
+    if (cap = this.rules.autolink.exec(src)) {
+      src = src.substring(cap[0].length);
+      if (cap[2] === '@') {
+        text = cap[1][6] === ':'
+          ? this.mangle(cap[1].substring(7))
+          : this.mangle(cap[1]);
+        href = this.mangle('mailto:') + text;
+      } else {
+        text = escape(cap[1]);
+        href = text;
+      }
+      out += text.underline;
+      continue;
+    }
 
-	console.log('>>>>>>>>>>>>>>>>> MARKDOWN >>>>>>>>>>>>>>>>\n');
-	console.log(buffer.toString());
+    // url (gfm)
+    if (cap = this.rules.url.exec(src)) {
+      src = src.substring(cap[0].length);
+      text = escape(cap[1]);
+      href = text;
+      out += text.underline.inverse;
+      continue;
+    }
 
-	console.log('>>>>>>>>>>>>>>>>> OUTPUT >>>>>>>>>>>>>>>>\n');
-	process.stdout.write(output);
-});
+    // tag
+    if (cap = this.rules.tag.exec(src)) {
+      src = src.substring(cap[0].length);
+      out += this.options.sanitize
+        ? escape(cap[0])
+        : cap[0];
+      continue;
+    }
+
+    // link
+    if (cap = this.rules.link.exec(src)) {
+      src = src.substring(cap[0].length);
+      out += this.outputLink(cap, {
+        href: cap[2],
+        title: cap[3]
+      });
+      continue;
+    }
+
+    // reflink, nolink
+    if ((cap = this.rules.reflink.exec(src))
+        || (cap = this.rules.nolink.exec(src))) {
+      src = src.substring(cap[0].length);
+      link = (cap[2] || cap[1]).replace(/\s+/g, ' ');
+      link = this.links[link.toLowerCase()];
+      if (!link || !link.href) {
+        out += cap[0][0];
+        src = cap[0].substring(1) + src;
+        continue;
+      }
+      out += this.outputLink(cap, link);
+      continue;
+    }
+
+    // strong
+    if (cap = this.rules.strong.exec(src)) {
+      src = src.substring(cap[0].length);
+      out += this.output(cap[2] || cap[1]).bold;
+      continue;
+    }
+
+    // em
+    if (cap = this.rules.em.exec(src)) {
+      src = src.substring(cap[0].length);
+      console.log('em', this.output(cap[2] || cap[1]));
+      out += this.output(cap[2] || cap[1]).italic;
+      continue;
+    }
+
+    // code
+    if (cap = this.rules.code.exec(src)) {
+      src = src.substring(cap[0].length);
+      out += '`'
+        + escape(cap[2], true)
+        + '`';
+      continue;
+    }
+
+    // br
+    if (cap = this.rules.br.exec(src)) {
+      src = src.substring(cap[0].length);
+      out += '\n\n';
+      continue;
+    }
+
+    // del (gfm)
+    if (cap = this.rules.del.exec(src)) {
+      src = src.substring(cap[0].length);
+      out += '~' + this.output(cap[1]) + '~';
+      continue;
+    }
+
+    // text
+    if (cap = this.rules.text.exec(src)) {
+      src = src.substring(cap[0].length);
+      out += escape(this.smartypants(cap[0]));
+      continue;
+    }
+
+    if (src) {
+      throw new
+        Error('Infinite loop on byte: ' + src.charCodeAt(0));
+    }
+  }
+
+  return out;
+};
+
+exports.fromFile = function (path, cb) {
+  var parser = new Parser();
+
+  fs.readFile(path, function (err, buffer) {
+    var src = marked.lexer(buffer.toString());
+    return parser.parse(src);
+  });
+};
+
+exports.fromFileSync = function (path) {
+  var parser = new Parser();
+  var buffer = fs.readFileSync(path);
+  var src = marked.lexer(buffer.toString());
+  return parser.parse(src);
+};
+
+exports.fromString = function (string) {
+  var parser = new Parser();
+  var src = marked.lexer(string);
+  return parser.parse(src);
+};
