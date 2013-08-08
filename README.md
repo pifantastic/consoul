@@ -23,3 +23,7 @@ We wanted to write markdown documentation for our grunt tasks. We wanted to be a
 ## How?
 
 Consoul uses the [marked](https://github.com/chjj/marked) Markdown parser. It overrides a few methods two render console appropriate stuff instead of HTML. It uses a (hacked!) version of [highlight.js](https://github.com/isagalaev/highlight.js) to do the syntax highlighting.
+
+## TODO
+
+* Formatting of GFM tables
