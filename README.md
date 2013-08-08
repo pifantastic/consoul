@@ -1,30 +1,25 @@
 # Consoul
 
-Display markdown in a terminal.
+Consoul is a markdown renderer for the terminal. You might say it adds some soul to your console? I'm so sorry.
 
-***
+## Usage
+
+```javascript
+var consoul = require('consoul');
+
+process.stdout.write(consoul.fromFileSync('./README'));
+
+consoul.fromFile(function (err, output) {
+	process.stdout.write(output);
+});
+
+process.stdout.write(consoul.fromString('# Hello World!'));
+```
 
 ## Why?
 
-Stop dealing with `--help`. Shove that shit in a markdown file.
+We wanted to write markdown documentation for our grunt tasks. We wanted to be able to display that documentation when running `grunt help`. Whatevs.
 
-> A joke is a very serious thing.
+## How?
 
-http://google.com has a **good** *search* tool.
-
-1. one fish
-2. two fish
-
-
-* red fish
-* blue fish
-
-```javascript
-var foo = 'bar';
-
-var baz = function (one, two) {
-	if (true) {
-		console.log('boom!');
-	}
-};
-```
+Consoul uses the [marked](https://github.com/chjj/marked) Markdown parser. It overrides a few methods two render console appropriate stuff instead of HTML. It uses a (hacked!) version of [highlight.js](https://github.com/isagalaev/highlight.js) to do the syntax highlighting.
