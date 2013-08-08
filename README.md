@@ -18,4 +18,6 @@ Stop dealing with `--help`. Shove that shit in a markdown file.
 * red fish
 * blue fish
 
-`var foo = 'bar';`
+```javascript
+var foo = 'bar';
+```
