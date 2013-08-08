@@ -38,7 +38,8 @@ Parser.prototype.tok = function () {
     }
 
     case 'code': {
-      return highlight.highlight(this.token.lang, this.token.text, function (type, text) {
+      var body = (this.token.lang + ':').inverse + '\n';
+      return body + highlight.highlight(this.token.lang, this.token.text, function (type, text) {
         switch (type) {
           case 'keyword':
             return text.cyan;
@@ -48,29 +49,6 @@ Parser.prototype.tok = function () {
             return text;
         }
       }).value + '\n';
-
-      // if (this.options.highlight) {
-      //   var code = this.options.highlight(this.token.text, this.token.lang);
-      //   if (code != null && code !== this.token.text) {
-      //     this.token.escaped = true;
-      //     this.token.text = code;
-      //   }
-      // }
-
-      // if (!this.token.escaped) {
-      //   this.token.text = escape(this.token.text, true);
-      // }
-
-      // return '<pre><code'
-      //   + (this.token.lang
-      //   ? ' class="'
-      //   + this.options.langPrefix
-      //   + this.token.lang
-      //   + '"'
-      //   : '')
-      //   + '>'
-      //   + this.token.text
-      //   + '</code></pre>\n';
     }
 
     case 'table': {

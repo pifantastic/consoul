@@ -20,4 +20,8 @@ Stop dealing with `--help`. Shove that shit in a markdown file.
 
 ```javascript
 var foo = 'bar';
+
+var baz = function () {
+	console.log('boom!');
+};
 ```
