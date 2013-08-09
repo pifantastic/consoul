@@ -16,6 +16,8 @@ consoul.fromFile('./EXAMPLE.md', function (err, output) {
 process.stdout.write(consoul.fromString('# Hello World!'));
 ```
 
+### Output:
+
 ![Screenshot](http://grimhappy.com/i/b13fcd7.png)
 
 ## Why?
