@@ -25,5 +25,15 @@ exports.fromString = function (string) {
 };
 
 if (require.main === module) {
-  process.stdout.write(exports.fromFileSync('./EXAMPLE.md'));
+  if (process.argv.length < 3) {
+    var pkg = require('./package.json');
+    console.log('consoul version: ' + pkg.version);
+    console.log('\nusage:');
+    console.log('\tconsoul <FILE>\n');
+  }
+  else {
+    var file = process.argv[2];
+    process.stdout.write(exports.fromFileSync(file));
+  }
+
 }
