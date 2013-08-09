@@ -7,9 +7,9 @@ Consoul is a markdown renderer for the terminal. You might say it adds some soul
 ```javascript
 var consoul = require('consoul');
 
-process.stdout.write(consoul.fromFileSync('./README'));
+process.stdout.write(consoul.fromFileSync('./README.md'));
 
-consoul.fromFile(function (err, output) {
+consoul.fromFile('./README.md', function (err, output) {
 	process.stdout.write(output);
 });
 
