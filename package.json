@@ -1,6 +1,6 @@
 {
   "name": "consoul",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Markdown in your console",
   "main": "index.js",
   "scripts": {
