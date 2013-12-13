@@ -1,0 +1,12 @@
+#!/usr/bin/env node
+
+if (process.argv.length < 3) {
+  var pkg = require(__dirname + '/../package.json');
+  console.log('consoul version: ' + pkg.version);
+  console.log('\nusage:');
+  console.log('\tconsoul <FILE>\n');
+}
+else {
+  var file = process.argv[2];
+  process.stdout.write(require(__dirname + '/../index').fromFileSync(file));
+}
