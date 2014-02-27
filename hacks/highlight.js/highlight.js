@@ -600,6 +600,7 @@ hljs.LANGUAGES['rust'] = require('./rust.js')(hljs);
 hljs.LANGUAGES['rib'] = require('./rib.js')(hljs);
 hljs.LANGUAGES['diff'] = require('./diff.js')(hljs);
 hljs.LANGUAGES['javascript'] = require('./javascript.js')(hljs);
+hljs.LANGUAGES['js'] = require('./javascript.js')(hljs);
 hljs.LANGUAGES['glsl'] = require('./glsl.js')(hljs);
 hljs.LANGUAGES['rsl'] = require('./rsl.js')(hljs);
 hljs.LANGUAGES['lua'] = require('./lua.js')(hljs);
